@@ -38,6 +38,13 @@
             object-fit: cover;
             z-index: -10;
         }
+        #weather-icon {
+  filter: invert(1); /* Makes white icons black */
+}
+#weather-icon {
+  filter: brightness(0) saturate(100%);
+}
+
     </style>
 </head>
 
@@ -78,7 +85,7 @@
                     <option>Metric</option>
                     <option>Imperial</option>
                 </select> -->
-                <div class="relative w-full min-w-[200px]">
+                <div class="relative w-full min-w-[480px]">
                     <input id="search-input" type="text" placeholder="Search city..."
                         class="bg-white border border-gray-300 rounded-lg px-4 py-2 w-full text-sm shadow-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all" />
                     <ul id="suggestions"
@@ -90,41 +97,41 @@
 
         <div class="grid grid-cols-1 lg:flex lg:gap-6">
             <div
-                class="bg-blue-100 rounded-3xl shadow-xl p-8 lg:w-3/5 fade-in-up transition-transform duration-300 hover:-translate-y-1 ">
+class="bg-gradient-to-r from-blue-400 to-cyan-300 rounded-3xl shadow-xl p-8 lg:w-3/5 fade-in-up transition-transform duration-300 hover:-translate-y-1">
                 <p id="location-name" class="font-bold text-xl text-gray-800 mb-4 text-center">--</p>
                 <div class="flex items-start justify-between mb-6">
                     <div class="flex flex-col">
                         <p id="temp" class="text-6xl font-extrabold text-gray-800">--°C</p>
-                        <p id="condition" class="text-gray-500 font-medium text-lg ml-1">--</p>
+                        <p id="condition" class="text-black-500 font-medium text-lg ml-1">--</p>
                     </div>
                     <div>
-<img id="weather-icon" src="" alt="Weather icon" class="w-24 h-24">
+<img id="weather-icon" src="https://openweathermap.org/img/wn/10d.svg" alt="Weather icon" class="w-24 h-24">
                             
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-y-2 text-sm font-medium text-gray-600 mb-6">
                     <div class="flex items-center">
-                        <p class="text-gray-500 mr-1">Feels Like:</p>
+                        <p class="text-black-500 mr-1">Feels Like:</p>
                         <span id="feels-like" class="font-bold">--°</span>
                     </div>
                     <div class="flex items-center">
-                        <p class="text-gray-500 mr-1">High:</p>
+                        <p class="text-black-500 mr-1">High:</p>
                         <span id="high-temp" class="font-bold">--°</span>
-                        <span class="text-gray-500 ml-1">/ Low:</span>
+                        <span class="text-black-500 ml-1">/ Low:</span>
                         <span id="low-temp" class="font-bold">--°</span>
                     </div>
-                    <!-- <div class="flex items-center">
-                        <p class="text-gray-500 mr-1">Temp. 24h Change:</p>
+                    <div class="flex items-center">
+                        <p class="text-black-500 mr-1">Temp. 24h Change:</p>
                         <span id="temp-change" class="font-bold">--°</span>
                     </div>
                     <div class="flex items-center">
-                        <p class="text-gray-500 mr-1">QPF:</p>
+                        <p class="text-black-500 mr-1">QPF:</p>
                         <span id="qpf" class="font-bold">--mm</span>
-                    </div> -->
+                    </div>
                 </div>
 
-                <!-- <div class="flex items-center space-x-8 text-gray-600 text-sm mt-4">
+                <div class="flex items-center space-x-8 text-gray-600 text-sm mt-4">
                     <div class="flex items-center">
                         <span class="text-xl mr-2 text-yellow-500">⚡</span>
                        <p class="text-gray-500">Thunderstorm Probability 
@@ -137,7 +144,7 @@
   <span id="rain-prob" class="font-bold text-gray-800">--%</span>
 </p>
                     </div>
-                </div> -->
+                </div>
             </div>
 
             <div

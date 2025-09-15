@@ -1,12 +1,11 @@
-const API_KEY = "1f9653ccfcb3fc5993f6a76bafb197e5";
+
+const API_KEY ="1f9653ccfcb3fc5993f6a76bafb197e5";
+
+// DOM Elements
 const searchInput = document.getElementById("search-input");
 const suggestionsBox = document.getElementById("suggestions");
 const locationNameEl = document.getElementById("location-name");
 const mapTitleEl = document.getElementById("map-title");
-const bgVideo = document.getElementById("bg-video");
-
-let map, marker;
-
 const tempEl = document.getElementById("temp");
 const conditionEl = document.getElementById("condition");
 const weatherIconEl = document.getElementById("weather-icon");
@@ -26,35 +25,14 @@ const humidityEl = document.getElementById("humidity");
 const uvEl = document.getElementById("uv");
 const pressureEl = document.getElementById("pressure");
 
-// ✅ Google Maps callback
-window.initMap = async function () {
-  const delhi = { lat: 28.6139, lng: 77.2090 };
+let map, marker;
 
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: delhi,
-    zoom: 10,
-    disableDefaultUI: true,
-  });
-
-  marker = new google.maps.Marker({
-    position: delhi,
-    map: map,
-    title: "Delhi, India",
-  });
-
-  mapTitleEl.textContent = "Delhi, India";
-
-  // ✅ Fetch and display Delhi weather on page load
-  const weather = await fetchWeather(delhi.lat, delhi.lng);
-  if (weather) updateWeatherUI(weather);
-};
-
-// ✅ Weather fetch functions
+/* ---------- FETCH FUNCTIONS ---------- */
 async function fetchSuggestions(query) {
   const url = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`;
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch suggestions");
+    if (!res.ok) throw new Error("Suggestions fetch failed");
     return await res.json();
   } catch (err) {
     console.error(err);
@@ -66,7 +44,7 @@ async function fetchWeather(lat, lon) {
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch weather");
+    if (!res.ok) throw new Error("Weather fetch failed");
     return await res.json();
   } catch (err) {
     console.error(err);
@@ -74,26 +52,31 @@ async function fetchWeather(lat, lon) {
   }
 }
 
-// ✅ Update UI & Background video
+// 
+
+
+/* ---------- UI UPDATE FUNCTIONS ---------- */
 function updateWeatherUI(weather) {
   if (!weather || weather.cod !== 200) {
     locationNameEl.textContent = "Location Not Found";
     mapTitleEl.textContent = "Map";
     return;
   }
-
   const fullLocation = `${weather.name}, ${weather.sys.country}`;
   locationNameEl.textContent = fullLocation;
   mapTitleEl.textContent = fullLocation;
 
   const newLoc = { lat: weather.coord.lat, lng: weather.coord.lon };
-  map.setCenter(newLoc);
-  marker.setPosition(newLoc);
-  marker.setTitle(fullLocation);
+  if (map && marker) {
+    map.setCenter(newLoc);
+    marker.setPosition(newLoc);
+    marker.setTitle(fullLocation);
+  }
 
   tempEl.textContent = `${Math.round(weather.main.temp)}°C`;
   conditionEl.textContent = weather.weather[0].description;
   weatherIconEl.src = `https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`;
+
   feelsLikeEl.textContent = `${Math.round(weather.main.feels_like)}°`;
   highTempEl.textContent = `${Math.round(weather.main.temp_max)}°`;
   lowTempEl.textContent = `${Math.round(weather.main.temp_min)}°`;
@@ -102,25 +85,99 @@ function updateWeatherUI(weather) {
   pressureEl.textContent = `${weather.main.pressure} hPa`;
   cloudEl.textContent = `${weather.clouds.all}%`;
   windSpeedEl.textContent = `${Math.round(weather.wind.speed * 3.6)} km/h`;
-
-  // Change background video based on weather
-  const condition = weather.weather[0].main.toLowerCase();
-  let videoSrc = "videos/clear.mp4";
-  if (condition.includes("cloud")) videoSrc = "videos/cloudy.mp4";
-  else if (condition.includes("rain")) videoSrc = "videos/rain.mp4";
-  else if (condition.includes("thunder")) videoSrc = "videos/thunderstorm.mp4";
-  else if (condition.includes("snow")) videoSrc = "videos/snow.mp4";
-  else if (condition.includes("mist") || condition.includes("fog")) videoSrc = "videos/fog.mp4";
-
-  // const source = bgVideo.querySelector("source");
-  // if (!source.src.includes(videoSrc)) {
-  //   source.src = videoSrc;
-  //   bgVideo.load();
-  //   bgVideo.play().catch(err => console.error("Video play error:", err));
-  // }
+  windChillEl.textContent = `${Math.round(weather.main.temp)}°`;
+  heatIndexEl.textContent = `${Math.round(weather.main.temp)}°`;
+  uvEl.textContent = "--";
 }
 
-// ✅ Search suggestion handling
+function updateQPF(forecast) {
+  if (!forecast?.hourly) {
+    qpfEl.textContent = "--mm";
+    return;
+  }
+  const totalRain = forecast.hourly
+    .slice(0, 24)
+    .reduce((sum, h) => sum + (h.rain ? h.rain["1h"] || 0 : 0), 0);
+  qpfEl.textContent = `${totalRain.toFixed(1)} mm`;
+}
+
+function updateProbabilities(forecast) {
+  if (!forecast?.hourly?.length) {
+    rainProbEl.textContent = "--%";
+    thunderProbEl.textContent = "--%";
+    return;
+  }
+  const next24 = forecast.hourly.slice(0, 24);
+
+  // Average rain probability
+  const rainValues = next24.map(h => h.pop ?? 0);
+  const avgRain = (rainValues.reduce((a, b) => a + b, 0) / rainValues.length) * 100;
+
+  // Thunderstorm probability
+  const thunderValues = next24.map(h =>
+    h.weather.some(w => w.main.toLowerCase().includes("thunderstorm")) ? h.pop ?? 0 : 0
+  );
+  const avgThunder = thunderValues.length
+    ? (thunderValues.reduce((a, b) => a + b, 0) / thunderValues.length) * 100
+    : 0;
+
+  rainProbEl.textContent = `${avgRain.toFixed(0)}%`;
+  thunderProbEl.textContent = `${avgThunder.toFixed(0)}%`;
+}
+
+function updateTempChange(forecast) {
+  if (!forecast?.hourly || forecast.hourly.length < 24) {
+    tempChangeEl.textContent = "--°";
+    return;
+  }
+  const now = forecast.hourly[0].temp;
+  const next24 = forecast.hourly[23].temp;
+  const change = next24 - now;
+  tempChangeEl.textContent = `${change > 0 ? "+" : ""}${change.toFixed(1)}°`;
+}
+
+/* ---------- LOCATION HANDLER ---------- */
+async function handleLocation(lat, lon) {
+  // First: current weather
+  const weather = await fetchWeather(lat, lon);
+  if (weather) updateWeatherUI(weather);
+
+  // Second: forecast for probabilities and QPF
+  const forecast = await fetchForecast(lat, lon); // Uses /onecall
+  if (forecast) {
+    updateQPF(forecast);
+    updateProbabilities(forecast);
+    updateTempChange(forecast);
+  } else {
+    qpfEl.textContent = "--mm";
+    rainProbEl.textContent = "--%";
+    thunderProbEl.textContent = "--%";
+  }
+}
+
+
+/* ---------- GOOGLE MAP INITIALIZATION ---------- */
+window.initMap = function () {
+  const fallback = { lat: 28.6139, lng: 77.2090 }; // fallback Delhi
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: fallback,
+    zoom: 10,
+    disableDefaultUI: true,
+  });
+  marker = new google.maps.Marker({ position: fallback, map, title: "Delhi, India" });
+
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      pos => handleLocation(pos.coords.latitude, pos.coords.longitude),
+      () => handleLocation(fallback.lat, fallback.lng),
+      { timeout: 8000 }
+    );
+  } else {
+    handleLocation(fallback.lat, fallback.lng);
+  }
+};
+
+/* ---------- SEARCH INPUT & SUGGESTIONS ---------- */
 searchInput.addEventListener("input", async () => {
   const query = searchInput.value.trim();
   if (query.length < 2) {
@@ -137,8 +194,7 @@ searchInput.addEventListener("input", async () => {
       li.addEventListener("click", async () => {
         searchInput.value = li.textContent;
         suggestionsBox.classList.add("hidden");
-        const weather = await fetchWeather(city.lat, city.lon);
-        updateWeatherUI(weather);
+        await handleLocation(city.lat, city.lon);
       });
       suggestionsBox.appendChild(li);
     });
@@ -148,7 +204,7 @@ searchInput.addEventListener("input", async () => {
   }
 });
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", e => {
   if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
     suggestionsBox.classList.add("hidden");
   }

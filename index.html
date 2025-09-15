@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,32 +8,70 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .fade-in-up {
             animation: fadeInUp 0.8s ease-in-out;
         }
-          body {
-    background-color: #1e3a8a; /* fallback color */
-  }
+
+        body {
+            background-color: #1e3a8a;
+            /* fallback color */
+
+        }
+
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -10;
+        }
     </style>
 </head>
-<video id="bg-video" autoplay muted loop class="fixed top-0 left-0 w-full h-full object-cover -z-10">
-  <source src="assets/video/186245-877653533_small.mp4" type="video/mp4">
-</video>
 
+<!-- Wrap all Today (current weather) UI inside this -->
+<div id="today-tab">
+    <!-- everything from location name, map, metrics cards etc. goes here -->
+</div>
 
 <body class="bg-gray-100 font-sans min-h-screen">
+    <!-- ✅ Background Video -->
+    <video id="bg-video" class="fixed top-0 left-0 w-full h-full object-cover -z-10" autoplay muted loop playsinline>
+        <source id="bg-video-src" src="assets/video/186245-877653533_small.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
     <div class="max-w-7xl mx-auto p-6 space-y-6">
 
 
 
         <div class="flex flex-wrap justify-between items-center space-x-2 mb-6 fade-in-up">
             <div class="flex space-x-2">
-                <button class="tab-btn bg-blue-500 text-gray-800 font-semibold px-6 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors bg-gradient-to-r from-purple-500 to-pink-500">Today</button>
-                <button class="tab-btn bg-green-500 text-gray-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">Forecast</button>
-                <button class="tab-btn bg-red-500 text-gray-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors">History</button>
+                <button id="today-btn"
+                    class="tab-btn bg-blue-500 text-gray-800 font-semibold px-6 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors bg-gradient-to-r from-purple-500 to-pink-500">Today</button>
+                <button id="forecast-btn"
+        class="tab-btn bg-green-500 text-gray-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors"
+        disabled>
+    Forecast
+</button>
+
+<button
+        class="tab-btn bg-red-500 text-gray-600 font-semibold px-6 py-2 rounded-lg hover:bg-gray-500 transition-colors"
+        disabled>
+    History
+</button>
+
             </div>
             <div class="flex items-center space-x-2">
                 <!-- <select class="bg-white border border-gray-500 rounded-lg px-4 py-2 text-sm shadow-sm">
@@ -40,14 +79,18 @@
                     <option>Imperial</option>
                 </select> -->
                 <div class="relative w-full min-w-[200px]">
-                    <input id="search-input" type="text" placeholder="Search city..." class="bg-white border border-gray-300 rounded-lg px-4 py-2 w-full text-sm shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all" />
-                    <ul id="suggestions" class="absolute left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 hidden max-h-60 overflow-y-auto shadow-lg z-10"></ul>
+                    <input id="search-input" type="text" placeholder="Search city..."
+                        class="bg-white border border-gray-300 rounded-lg px-4 py-2 w-full text-sm shadow-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900 transition-all" />
+                    <ul id="suggestions"
+                        class="absolute left-0 right-0 bg-white border border-gray-300 rounded-lg mt-1 hidden max-h-60 overflow-y-auto shadow-lg z-10">
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:flex lg:gap-6"> 
-            <div class="bg-blue-100 rounded-3xl shadow-xl p-8 lg:w-3/5 fade-in-up transition-transform duration-300 hover:-translate-y-1 ">
+        <div class="grid grid-cols-1 lg:flex lg:gap-6">
+            <div
+                class="bg-blue-100 rounded-3xl shadow-xl p-8 lg:w-3/5 fade-in-up transition-transform duration-300 hover:-translate-y-1 ">
                 <p id="location-name" class="font-bold text-xl text-gray-800 mb-4 text-center">--</p>
                 <div class="flex items-start justify-between mb-6">
                     <div class="flex flex-col">
@@ -55,7 +98,8 @@
                         <p id="condition" class="text-gray-500 font-medium text-lg ml-1">--</p>
                     </div>
                     <div>
-                        <img id="weather-icon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather icon" class="w-24 h-24">
+<img id="weather-icon" src="" alt="Weather icon" class="w-24 h-24">
+                            
                     </div>
                 </div>
 
@@ -70,103 +114,246 @@
                         <span class="text-gray-500 ml-1">/ Low:</span>
                         <span id="low-temp" class="font-bold">--°</span>
                     </div>
-                    <div class="flex items-center">
+                    <!-- <div class="flex items-center">
                         <p class="text-gray-500 mr-1">Temp. 24h Change:</p>
                         <span id="temp-change" class="font-bold">--°</span>
                     </div>
                     <div class="flex items-center">
                         <p class="text-gray-500 mr-1">QPF:</p>
                         <span id="qpf" class="font-bold">--mm</span>
-                    </div>
+                    </div> -->
                 </div>
 
-                <div class="flex items-center space-x-8 text-gray-600 text-sm mt-4">
+                <!-- <div class="flex items-center space-x-8 text-gray-600 text-sm mt-4">
                     <div class="flex items-center">
                         <span class="text-xl mr-2 text-yellow-500">⚡</span>
-                        <p class="text-gray-500">Thunderstorm Probability <span id="thunder-prob" class="font-bold text-gray-800">--%</span></p>
+                       <p class="text-gray-500">Thunderstorm Probability 
+  <span id="thunder-prob" class="font-bold text-gray-800">--%</span>
+</p>
                     </div>
                     <div class="flex items-center">
                         <span class="text-xl mr-2 text-blue-500">💧</span>
-                        <p class="text-gray-500">Rain Probability <span id="rain-prob" class="font-bold text-gray-800">--%</span></p>
+                        <p class="text-gray-500">Rain Probability 
+  <span id="rain-prob" class="font-bold text-gray-800">--%</span>
+</p>
                     </div>
-                </div>
+                </div> -->
             </div>
 
-            <div class="bg-white rounded-3xl shadow-xl p-6 lg:w-2/5 fade-in-up transition-transform duration-300 hover:-translate-y-1">
+            <div
+                class="bg-white rounded-3xl shadow-xl p-6 lg:w-2/5 fade-in-up transition-transform duration-300 hover:-translate-y-1">
                 <p id="map-title" class="font-bold text-gray-800 mb-4 text-center">--</p>
                 <div id="map" class="h-64 w-full rounded-2xl border border-gray-200"></div>
             </div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            
-            <div class="bg-white  rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500">
+
+            <div
+                class="bg-white  rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500">
                 <span class="inline-block p-2 rounded-full bg-blue-100 text-blue-500">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-18a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V9z"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-18a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V9z" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500 ">Wind Chill</p>
                 <p id="wind-chill" class="text-2xl font-bold text-white-800">--°</p>
             </div>
-            
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-cyan-500 to-blue-500">
+
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-cyan-500 to-blue-500">
                 <span class="inline-block p-2 rounded-full bg-red-100 text-red-500">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-18a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm-1 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V11z"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-18a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm-1 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V11z" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500">Heat Index</p>
                 <p id="heat-index" class="text-2xl font-bold text-gray-800">--°</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-violet-500 to-fuchsia-500">
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-violet-500 to-fuchsia-500">
                 <span class="inline-block p-2 rounded-full bg-green-100 text-green-500">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/><path fill-rule="evenodd" d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm0 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" clip-rule="evenodd"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                        <path fill-rule="evenodd"
+                            d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm0 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"
+                            clip-rule="evenodd" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500">Visibility</p>
                 <p id="visibility" class="text-2xl font-bold text-gray-800">-- km</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-violet-500 to-fuchsia-900">
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-violet-500 to-fuchsia-900">
                 <span class="inline-block p-2 rounded-full bg-purple-800 text-purple-800">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M17.5 12a7.5 7.5 0 1 0-15 0h1.5a6 6 0 1 1 12 0H17.5zM10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M17.5 12a7.5 7.5 0 1 0-15 0h1.5a6 6 0 1 1 12 0H17.5zM10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20z" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500">Cloud Cover</p>
                 <p id="cloud" class="text-2xl font-bold text-gray-800">--%</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-br from-blue-500 to-cyan-500">
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-br from-blue-500 to-cyan-500">
                 <span class="inline-block p-2 rounded-full bg-gray-100 text-gray-500">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm-1-16.5a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0v-5z"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm-1-16.5a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0v-5z" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500">Wind</p>
                 <p id="wind-speed" class="text-2xl font-bold text-gray-800">-- km/h</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-teal-500 to-green-500">
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-teal-500 to-green-500">
                 <span class="inline-block p-2 rounded-full bg-blue-100 text-blue-500">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm-1-16.5a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0v-5z"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm-1-16.5a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0v-5z" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500">Relative Humidity</p>
                 <p id="humidity" class="text-2xl font-bold text-gray-800">--%</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-b from-orange-500 to-red-500">
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-b from-orange-500 to-red-500">
                 <span class="inline-block p-2 rounded-full bg-yellow-100 text-yellow-500">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-18a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V9z"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-18a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM9 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V9z" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500">UV Index</p>
                 <p id="uv" class="text-2xl font-bold text-gray-800">--</p>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-blue-500 to-light-500">
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start space-y-2 fade-in-up transition transform hover:scale-105 bg-gradient-to-r from-blue-500 to-light-500">
                 <span class="inline-block p-2 rounded-full bg-blue-100 text-blue-500">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zM9 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V9z"/></svg>
+                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zM9 9a1 1 0 0 1 2 0v5a1 1 0 0 1-2 0V9z" />
+                    </svg>
                 </span>
                 <p class="text-lg text-white-500">Air Pressure</p>
                 <p id="pressure" class="text-2xl font-bold text-gray-800">-- hPa</p>
             </div>
         </div>
     </div>
-<script src="script.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA6zmZ7cDqJhLOIHkN0ysUnKDuoN1WBh1c&callback=initMap"></script>
-    
+    <!-- forecash Section Code Starts-->
+    <div id="forecast-tab" class="hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 fade-in-up">
+            <div class="bg-white rounded-3xl shadow-xl p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Hourly Forecast (24h)</h2>
+                <div class="flex overflow-x-auto gap-4 py-2" id="hourly-forecast-container">
+                </div>
+
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Precipitation</h2>
+                    <div id="precipitation-chart-container" class="w-full h-48">
+                        <canvas id="precipitation-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">UV-Index</h2>
+                    <div id="uv-chart-container" class="w-full h-48">
+                        <canvas id="uv-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-xl p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Daily Forecast (10 Days)</h2>
+                <div id="daily-forecast-container" class="space-y-4">
+                </div>
+
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-100 rounded-2xl p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Daytime Forecast</h3>
+                        <div class="flex items-center space-x-2">
+                            <img id="day-icon" src="" alt="Daytime icon" class="w-12 h-12">
+                            <p id="day-condition" class="text-gray-600">--</p>
+                        </div>
+                        <p id="day-temp" class="text-3xl font-bold text-gray-800 mt-2">--°</p>
+                        <div class="grid grid-cols-2 gap-y-2 text-sm font-medium text-gray-600 mt-4">
+                            <div class="flex items-center">
+                                <span>💧</span>
+                                <span id="day-rain-prob" class="ml-1">--%</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span>💨</span>
+                                <span id="day-wind" class="ml-1">-- km/h</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span>☁️</span>
+                                <span id="day-cloud-cover" class="ml-1">--%</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span>☀️</span>
+                                <span id="day-uv-index" class="ml-1">UV --</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-100 rounded-2xl p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Nighttime Forecast</h3>
+                        <div class="flex items-center space-x-2">
+                            <img id="night-icon" src="" alt="Nighttime icon" class="w-12 h-12">
+                            <p id="night-condition" class="text-gray-600">--</p>
+                        </div>
+                        <p id="night-temp" class="text-3xl font-bold text-gray-800 mt-2">--°</p>
+                        <div class="grid grid-cols-2 gap-y-2 text-sm font-medium text-gray-600 mt-4">
+                            <div class="flex items-center">
+                                <span>💧</span>
+                                <span id="night-rain-prob" class="ml-1">--%</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span>💨</span>
+                                <span id="night-wind" class="ml-1">-- km/h</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span>☁️</span>
+                                <span id="night-cloud-cover" class="ml-1">--%</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span>🌙</span>
+                                <span id="night-uv-index" class="ml-1">UV --</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Forecash Section COde Ends  -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA6zmZ7cDqJhLOIHkN0ysUnKDuoN1WBh1c&callback=initMap"></script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (g => {
+            let h, a, k, p = "The Google Maps JavaScript API",
+                c = "google",
+                l = "maps",
+                b = "onload",
+                d = "onerror",
+                e = document,
+                f = window;
+            f.__googleMapsCallback = () => { initMap(); };
+            const s = e.createElement("script");
+            s.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA6zmZ7cDqJhLOIHkN0ysUnKDuoN1WBh1c&callback=__googleMapsCallback`;
+            s.async = true;
+            s.defer = true;
+            e.head.appendChild(s);
+        })();
+    </script>
+
 </body>
+
 </html>
